@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GuardianNewsApp</string>
+
+    <string name="icon">Arrow icon</string>
+
+    <string name="empty_view">No data were found.</string>
+    <string name="no_internet">Please check your Internet connection</string>
+</resources>
