@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import android.net.Uri;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -25,7 +26,8 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     private static final int NEWS_LOADER_ID = 1;
 
-    private String GUARDIAN_API_REQUEST = "http://content.guardianapis.com/search?section=culture|film&api-key=test";
+    private static final String GUARDIAN_API_REQUEST = "http://content.guardianapis.com/search?" +
+            "section=culture|film&api-key=test&show-tags=contributor";
 
     /**
      * TextView that is displayed when the list is empty
@@ -34,16 +36,31 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     private NewsAdapter mAdapter;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView newsListView = (ListView) findViewById(R.id.list);
+        final ListView newsListView = (ListView) findViewById(R.id.list);
+
+        //Identify our widget.
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.activity_main_swipe_refresh_layout);
 
         mAdapter = new NewsAdapter(this, new ArrayList<News>());
 
         newsListView.setAdapter(mAdapter);
+
+        //When refresh is called we update the list.
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                newsListView.setAdapter(mAdapter);
+                //Dismiss loading icon when done
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
 
         //On user click, one article opens the relative webpage from guardian website.
         newsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -66,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
-
 
         //Set the empty view when no data are to be displayed.
         mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
@@ -91,13 +107,11 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     @Override
     public Loader<List<News>> onCreateLoader(int id, Bundle args) {
-
         return new NewsLoader(this, GUARDIAN_API_REQUEST);
     }
 
     @Override
     public void onLoadFinished(Loader<List<News>> loader, List<News> news) {
-
         ProgressBar spinner = (ProgressBar) findViewById(R.id.loading_spinner);
         spinner.setVisibility(View.GONE);
 
@@ -112,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         if (news != null && !news.isEmpty()) {
             mAdapter.addAll(news);
         }
-
     }
 
     @Override

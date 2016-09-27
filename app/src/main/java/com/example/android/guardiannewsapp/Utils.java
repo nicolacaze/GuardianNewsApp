@@ -133,10 +133,23 @@ public final class Utils {
                 String date = article.getString("webPublicationDate");
                 String url = article.getString("webUrl");
 
-                News news = new News(section, title, date, url);
-                data.add(news);
-            }
+                /*Check if contributors are available and get results. Otherwise return null for
+                contributors.
+                 */
+                JSONArray tags = article.getJSONArray("tags");
+                if (tags.length() != 0) {
+                    for (int y = 0; y < tags.length(); y++) {
+                        JSONObject contributors = tags.getJSONObject(y);
+                        String contributorName = contributors.getString("webTitle");
 
+                        News news = new News(section, title, date, contributorName, url);
+                        data.add(news);
+                    }
+                } else {
+                    News news = new News(section, title, date, null, url);
+                    data.add(news);
+                }
+            }
             return data;
 
         } catch (JSONException e) {
