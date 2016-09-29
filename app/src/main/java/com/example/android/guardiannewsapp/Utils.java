@@ -111,7 +111,6 @@ public final class Utils {
                 line = bufferedReader.readLine();
             }
         }
-
         return output.toString();
     }
 
