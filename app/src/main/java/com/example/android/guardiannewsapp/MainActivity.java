@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.os.Handler;
 
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<News>> {
 
@@ -37,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     private NewsAdapter mAdapter;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +65,11 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
+
+        //Create the Handler object.
+        mHandler= new Handler();
+        //Start refreshing UI every 15 seconds.
+        startRepeatingTask();
 
         //On user click, one article opens the relative webpage from guardian website.
         newsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -103,6 +112,21 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
             spinner.setVisibility(View.GONE);
             mEmptyStateTextView.setText(R.string.no_internet);
         }
+    }
+
+    private Runnable runnableCode = new Runnable() {
+        @Override
+        public void run() {
+            ListView newsListView = (ListView) findViewById(R.id.list);
+            //Making a new call to the API.
+            newsListView.setAdapter(mAdapter);
+            // Repeat this the same runnable code block again another 15 seconds
+            mHandler.postDelayed(runnableCode, 15000);
+        }
+    };
+
+    private void startRepeatingTask() {
+        runnableCode.run();
     }
 
     @Override
