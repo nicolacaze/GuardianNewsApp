@@ -52,7 +52,7 @@ public final class Utils {
             Log.e(LOG_TAG, "The url provided is malformed", e);
             return null;
         }
-        return  url;
+        return url;
     }
 
     //Open a HTTP connection with Guardianapis server
@@ -133,18 +133,27 @@ public final class Utils {
                 String date = article.getString("webPublicationDate");
                 String url = article.getString("webUrl");
 
+                //Declare our builder to create a String of contributors' name.
+                StringBuilder builder = new StringBuilder();
+                String contributors;
+
                 /*Check if contributors are available and get results. Otherwise return null for
                 contributors.
                  */
                 JSONArray tags = article.getJSONArray("tags");
                 if (tags.length() != 0) {
                     for (int y = 0; y < tags.length(); y++) {
-                        JSONObject contributors = tags.getJSONObject(y);
-                        String contributorName = contributors.getString("webTitle");
-
-                        News news = new News(section, title, date, contributorName, url);
-                        data.add(news);
+                        JSONObject contributor = tags.getJSONObject(y);
+                        String contributorName = contributor.getString("webTitle");
+                        //Add each contributor to our builder.
+                        builder.append(contributorName);
                     }
+                    //Transform our builder into a String argument for our News object.
+                    contributors = builder.toString();
+                    News news = new News(section, title, date, contributors, url);
+                    data.add(news);
+                    //Clear builder for the next loop.
+                    builder.setLength(0);
                 } else {
                     News news = new News(section, title, date, null, url);
                     data.add(news);
